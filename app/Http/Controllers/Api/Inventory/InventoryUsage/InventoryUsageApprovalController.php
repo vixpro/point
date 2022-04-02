@@ -3,62 +3,43 @@
 namespace App\Http\Controllers\Api\Inventory\InventoryUsage;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Approval\ApproveRequest;
+use App\Http\Requests\Approval\RejectRequest;
+use App\Http\Resources\ApiResource;
+use App\Model\Inventory\InventoryUsage\InventoryUsage;
 
 class InventoryUsageApprovalController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
+  /**
+   * @param ApproveRequest $request
+   * @param $id
+   * @return ApiResource
+   */
+  public function approve(ApproveRequest $request, $id)
+  {
+    $inventoryUsage = InventoryUsage::findOrFail($id);
+    $inventoryUsage->form->approval_by = auth()->user()->id;
+    $inventoryUsage->form->approval_at = now();
+    $inventoryUsage->form->approval_status = 1;
+    $inventoryUsage->form->save();
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+    return new ApiResource($inventoryUsage);
+  }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
+  /**
+   * @param RejectRequest $request
+   * @param $id
+   * @return ApiResource
+   */
+  public function reject(RejectRequest $request, $id)
+  {
+    $inventoryUsage = InventoryUsage::findOrFail($id);
+    $inventoryUsage->form->approval_by = auth()->user()->id;
+    $inventoryUsage->form->approval_at = now();
+    $inventoryUsage->form->approval_reason = $request->get('reason');
+    $inventoryUsage->form->approval_status = -1;
+    $inventoryUsage->form->save();
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
+    return new ApiResource($inventoryUsage);
+  }
 }
