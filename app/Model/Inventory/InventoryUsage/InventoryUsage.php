@@ -4,6 +4,7 @@ namespace App\Model\Inventory\InventoryUsage;
 
 use App\Helpers\Inventory\InventoryHelper;
 use App\Model\Form;
+use App\Model\HumanResource\Employee\Employee;
 use App\Model\Master\Item;
 use App\Model\Master\Warehouse;
 use App\Model\TransactionModel;
@@ -20,6 +21,7 @@ class InventoryUsage extends TransactionModel
 
   protected $fillable = [
     'warehouse_id',
+    'employee_id'
   ];
 
   public $defaultNumberPrefix = 'IU';
@@ -37,6 +39,11 @@ class InventoryUsage extends TransactionModel
   public function warehouse()
   {
     return $this->belongsTo(Warehouse::class);
+  }
+
+  public function employee()
+  {
+    return $this->belongsTo(Employee::class);
   }
 
   public function isAllowedToUpdate()
