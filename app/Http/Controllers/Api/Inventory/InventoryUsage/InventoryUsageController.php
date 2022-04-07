@@ -214,9 +214,9 @@ class InventoryUsageController extends Controller
 
     $payload["base_url"] = 'https://' . env('TENANT_DOMAIN');
     $payload["urls"] = [
-      "check_url" => $base_url . '/inventory/usage/' . $result->id,
-      "approve_url" => $base_url . '/inventory/usage/' . $result->id,
-      "reject_url" => $base_url . '/inventory/usage/' . $result->id,
+      "check_url" => $payload["base_url"] . '/inventory/usage/' . $result->id,
+      "approve_url" => $payload["base_url"] . '/inventory/usage/' . $result->id,
+      "reject_url" => $payload["base_url"] . '/inventory/usage/' . $result->id,
     ];
 
     Mail::to($payload["approver_email"])->queue(new InventoryUsageApprovalNotificationMail($payload));
