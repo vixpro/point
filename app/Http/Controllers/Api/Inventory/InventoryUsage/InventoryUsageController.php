@@ -12,6 +12,7 @@ use App\Model\Form;
 use App\Model\Master\User as TenantUser;
 use App\Mail\InventoryUsageApprovalNotificationMail;
 use App\Model\Inventory\InventoryUsage\InventoryUsage;
+use App\Model\Inventory\InventoryUsage\InventoryUsageActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -66,6 +67,12 @@ class InventoryUsageController extends Controller
 
     $this->sendApprovalEmail($request, $result);
 
+    InventoryUsageActivity::create([
+      'activity_name' => 'Created',
+      'inventory_usage_id' => $result->id,
+      'user_id' => auth()->user()->id,
+    ]);
+
     return $result;
   }
 
@@ -119,6 +126,12 @@ class InventoryUsageController extends Controller
       return new ApiResource($inventoryUsage);
     });
 
+    InventoryUsageActivity::create([
+      'activity_name' => 'Updated',
+      'inventory_usage_id' => $result->id,
+      'user_id' => auth()->user()->id,
+    ]);
+
     return $result;
   }
 
@@ -137,7 +150,42 @@ class InventoryUsageController extends Controller
 
     $inventoryUsage->requestCancel($request);
 
+    InventoryUsageActivity::create([
+      'activity_name' => 'Deleted',
+      'inventory_usage_id' => $inventoryUsage->id,
+      'user_id' => auth()->user()->id,
+    ]);
+
     return response()->json([], 204);
+  }
+
+  /**
+   * Get activity history form
+   *
+   * @param Request $request
+   * @param $id
+   * @return string
+   */
+
+  public function history(Request $request, $id)
+  {
+    $inventoryUsage = InventoryUsage::findOrFail($id);
+    $inventoryUsageActivity = InventoryUsageActivity::where(['inventory_usage_id' => $inventoryUsage->id])->eloquentFilter($request);
+
+    if ($request->get('join')) {
+      $fields = explode(',', $request->get('join'));
+
+      if (in_array('form', $fields)) {
+        $inventoryUsageActivity = $inventoryUsageActivity->join(Form::getTableName(), function ($q) {
+          $q->on(Form::getTableName('formable_id'), '=', InventoryUsageActivity::getTableName('inventory_usage_id'))
+            ->where(Form::getTableName('formable_type'), "InventoryUsage");
+        });
+      }
+    }
+
+    $inventoryUsageActivity = pagination($inventoryUsageActivity, $request->get('limit'));
+
+    return new ApiResource($inventoryUsageActivity);
   }
 
   /**
