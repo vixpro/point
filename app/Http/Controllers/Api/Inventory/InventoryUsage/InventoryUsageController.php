@@ -201,35 +201,25 @@ class InventoryUsageController extends Controller
 
     $fromTz = config()->get('app.timezone');
     $toTz = config()->get('project.timezone');
+    $payload = [];
+    $payload["approver_name"] = $request->approver_name;
+    $payload["approver_email"] = $request->approver_email;
+    $payload["form"] = $result->form;
+    $payload["warehouse"] = $result->warehouse;
+    $payload["day_time"] = Carbon::parse($result->date, $fromTz)->timezone($toTz)->isoFormat("DD MMMM YYYY");
+    $payload["created_at"] = Carbon::parse($result->form->created_at, $fromTz)->timezone($toTz)->isoFormat("DD MMMM YYYY HH:mm");
+    $payload["created_by"] = TenantUser::findOrFail($result->form->created_by)->name;
+    $payload["notes"] = $result->form->notes;
+    $payload["items"] = $request->items;
 
-    $approver_name = $request->approver_name;
-    $approver_email = $request->approver_email;
-    $form = $result->form;
-    $warehouse = $result->warehouse;
-    $day_time = Carbon::parse($result->date, $fromTz)->timezone($toTz)->isoFormat("DD MMMM YYYY");
-    $created_at = Carbon::parse($result->form->created_at, $fromTz)->timezone($toTz)->isoFormat("DD MMMM YYYY HH:mm");
-    $created_by = TenantUser::findOrFail($result->form->created_by)->name;
-    $notes = $result->form->notes;
-    $items = $request->items;
-
-    $base_url = 'https://' . env('TENANT_DOMAIN');
-    $urls = [
+    $payload["base_url"] = 'https://' . env('TENANT_DOMAIN');
+    $payload["urls"] = [
       "check_url" => $base_url . '/inventory/usage/' . $result->id,
       "approve_url" => $base_url . '/inventory/usage/' . $result->id,
       "reject_url" => $base_url . '/inventory/usage/' . $result->id,
     ];
 
-    Mail::to($approver_email)->queue(new InventoryUsageApprovalNotificationMail(
-      $approver_name,
-      $form,
-      $warehouse,
-      $day_time,
-      $created_at,
-      $created_by,
-      $notes,
-      $items,
-      $urls,
-    ));
+    Mail::to($payload["approver_email"])->queue(new InventoryUsageApprovalNotificationMail($payload));
 
     return "success";
   }

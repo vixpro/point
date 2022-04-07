@@ -26,17 +26,17 @@ class InventoryUsageApprovalNotificationMail extends Mailable
    *
    * @return void
    */
-  public function __construct($approver_name, $form, $warehouse, $day_time, $created_at, $created_by, $notes, $items, $urls)
+  public function __construct($payload)
   {
-    $this->approver_name = $approver_name;
-    $this->form = $form;
-    $this->warehouse = $warehouse;
-    $this->day_time = $day_time;
-    $this->created_at = $created_at;
-    $this->created_by = $created_by;
-    $this->notes = $notes;
-    $this->items = $items;
-    $this->urls = $urls;
+    $this->approver_name = $payload["approver_name"];
+    $this->form = $payload["form"];
+    $this->warehouse = $$payload["warehouse"];
+    $this->day_time = $payload["day_time"];
+    $this->created_at = $payload["created_at"];
+    $this->created_by = $payload["created_by"];
+    $this->notes = $payload["notes"];
+    $this->items = $payload["items"];
+    $this->urls = $payload["urls"];
   }
 
   /**
