@@ -30,7 +30,7 @@ class InventoryUsageApprovalNotificationMail extends Mailable
   {
     $this->approver_name = $payload["approver_name"];
     $this->form = $payload["form"];
-    $this->warehouse = $$payload["warehouse"];
+    $this->warehouse = $payload["warehouse"];
     $this->day_time = $payload["day_time"];
     $this->created_at = $payload["created_at"];
     $this->created_by = $payload["created_by"];
