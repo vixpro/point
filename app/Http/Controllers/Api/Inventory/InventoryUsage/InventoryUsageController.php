@@ -33,9 +33,9 @@ class InventoryUsageController extends Controller
       $fields = explode(',', $request->get('join'));
 
       if (in_array('form', $fields)) {
-        $inventoryUsages = $inventoryUsages->join(Form::getTableName(), function ($q) {
-          $q->on(Form::getTableName('formable_id'), '=', InventoryUsage::getTableName('id'))
-            ->where(Form::getTableName('formable_type'), InventoryUsage::$morphName);
+        $inventoryUsages = $inventoryUsages->join(Form::getTableName() . ' as ' . Form::$alias, function ($q) {
+          $q->on(Form::$alias . '.formable_id', '=', InventoryUsage::getTableName('id'))
+            ->where(Form::$alias . '.formable_type', InventoryUsage::$morphName);
         });
       }
     }
