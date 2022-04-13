@@ -28,7 +28,7 @@ class StoreRequest extends FormRequest
     return [
       'warehouse_id' => 'required',
       'request_approval_to' => 'required',
-
+      'employee_id' => 'required',
       'items.*.item_id' => ValidationRule::foreignKey('items'),
       'items.*.quantity' => ValidationRule::quantity(),
       'items.*.unit' => ValidationRule::unit(),
