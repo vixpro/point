@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Api\Inventory\InventoryUsage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Inventory\Usage\StoreRequest;
 use App\Http\Requests\Inventory\Usage\UpdateRequest;
+use App\Http\Requests\Inventory\Usage\SendEmailRequest;
 use App\Http\Resources\ApiCollection;
 use App\Http\Resources\ApiResource;
 use Carbon\Carbon;
 use App\Model\Form;
 use App\Model\Master\User as TenantUser;
 use App\Mail\InventoryUsageApprovalNotificationMail;
+use App\Mail\InventoryUsageFormEmployeeNotificationMail;
+use App\Model\HumanResource\Employee\Employee;
 use App\Model\Inventory\InventoryUsage\InventoryUsage;
 use App\Model\Inventory\InventoryUsage\InventoryUsageActivity;
 use Illuminate\Http\Request;
@@ -189,13 +192,30 @@ class InventoryUsageController extends Controller
   }
 
   /**
+   * Send email to employee
+   *
+   * @param StoreRequest $request
+   * @return mixed
+   */
+  public function sendFormEmailToEmployee(SendEmailRequest $request)
+  {
+    $employee = Employee::findOrFail($request->get('employee_id'));
+    $payload = [
+      'employee_name' => $employee->name,
+      'created_by' => TenantUser::findOrFail($request->get('created_by'))->name,
+    ];
+
+    Mail::to($request->get('email'))->queue(new InventoryUsageFormEmployeeNotificationMail($payload));
+    return response()->json(['data' => [], 'message' => 'Successfully sent email!'], 200);
+  }
+
+  /**
    * Send email to user approver
    *
    * @param Request $request
    * @param $result
    * @return string
    */
-
   private function sendApprovalEmail($request, $result)
   {
 

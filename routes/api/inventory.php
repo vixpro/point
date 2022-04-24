@@ -8,6 +8,7 @@ Route::prefix('inventory')->namespace('Inventory')->group(function () {
   Route::get('inventory-dna/{itemId}/all', 'InventoryDnaController@allDna');
   Route::post('usages/{id}/approve', 'InventoryUsage\\InventoryUsageApprovalController@approve');
   Route::post('usages/{id}/reject', 'InventoryUsage\\InventoryUsageApprovalController@reject');
+  Route::post('usages/send-email-to-employee', 'InventoryUsage\\InventoryUsageController@sendFormEmailToEmployee');
   Route::get('usages/{id}/history', 'InventoryUsage\\InventoryUsageController@history');
   Route::apiResource('audits', 'InventoryAudit\\InventoryAuditController');
   Route::apiResource('usages', 'InventoryUsage\\InventoryUsageController');
