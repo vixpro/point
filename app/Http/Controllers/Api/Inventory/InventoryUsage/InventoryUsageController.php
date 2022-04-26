@@ -16,6 +16,7 @@ use App\Mail\InventoryUsageFormEmployeeNotificationMail;
 use App\Model\HumanResource\Employee\Employee;
 use App\Model\Inventory\InventoryUsage\InventoryUsage;
 use App\Model\Inventory\InventoryUsage\InventoryUsageActivity;
+use App\Model\Master\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -57,6 +58,17 @@ class InventoryUsageController extends Controller
    */
   public function store(StoreRequest $request)
   {
+    $tenantUser = TenantUser::find(auth()->user()->id);
+    $selectedWarehouse = Warehouse::findOrFail($request->get('warehouse_id'));
+
+    if ($tenantUser->warehouse_id != $request->get('warehouse_id')) {
+      return response()->json([
+        'code' => 422,
+        'message' => "You dont have default access on warehouse " . $selectedWarehouse->name,
+        'errors' => [],
+      ], 422);
+    };
+
     $result = DB::connection('tenant')->transaction(function () use ($request) {
       $inventoryUsage = InventoryUsage::create($request->all());
       $inventoryUsage
