@@ -37,6 +37,9 @@ class StoreRequest extends FormRequest
       'items.*' => [
         function ($attribute, $value, $fail) {
           $itemModel = Item::find($value["item_id"]);
+          if (!$itemModel) {
+            $fail($attribute . ' is not found');
+          }
           if ($itemModel->require_production_number || $itemModel->require_expiry_date) {
             if (empty($value['dna']) || !$value['dna']) {
               $fail($attribute . ' required production number or expiry date');
@@ -44,6 +47,7 @@ class StoreRequest extends FormRequest
           }
         },
       ],
+      'items' => ['required', 'array', 'min:1'],
     ];
   }
 }
