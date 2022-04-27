@@ -64,8 +64,10 @@ class InventoryUsageController extends Controller
     if ($tenantUser->warehouse_id != $request->get('warehouse_id')) {
       return response()->json([
         'code' => 422,
-        'message' => "You dont have default access on warehouse " . $selectedWarehouse->name,
-        'errors' => [],
+        'message' => "The given data was invalid.",
+        'errors' => [
+          "warehouse_id" => ["You dont have default access on warehouse " . $selectedWarehouse->name]
+        ],
       ], 422);
     };
 
