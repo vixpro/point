@@ -18,6 +18,11 @@ class InventoryUsageApprovalController extends Controller
   public function approve(ApproveRequest $request, $id)
   {
     $inventoryUsage = InventoryUsage::findOrFail($id);
+
+    if ($inventoryUsage->form->request_approval_to !== auth()->user()->id) {
+      return response()->json(['message' => "User don't have approval access!"], 403);
+    };
+
     $inventoryUsage->form->approval_by = auth()->user()->id;
     $inventoryUsage->form->approval_at = now();
     $inventoryUsage->form->approval_status = 1;
@@ -34,6 +39,11 @@ class InventoryUsageApprovalController extends Controller
   public function reject(RejectRequest $request, $id)
   {
     $inventoryUsage = InventoryUsage::findOrFail($id);
+
+    if ($inventoryUsage->form->request_approval_to !== auth()->user()->id) {
+      return response()->json(['message' => "User don't have reject access!"], 403);
+    };
+
     $inventoryUsage->form->approval_by = auth()->user()->id;
     $inventoryUsage->form->approval_at = now();
     $inventoryUsage->form->approval_reason = $request->get('reason');
