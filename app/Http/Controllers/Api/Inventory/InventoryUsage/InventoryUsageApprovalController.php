@@ -28,6 +28,8 @@ class InventoryUsageApprovalController extends Controller
     $inventoryUsage->form->approval_status = 1;
     $inventoryUsage->form->save();
 
+    InventoryUsage::updateInventory($inventoryUsage->form, $inventoryUsage);
+
     return new ApiResource($inventoryUsage);
   }
 

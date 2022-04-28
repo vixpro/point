@@ -80,7 +80,7 @@ class InventoryUsage extends TransactionModel
    * @param $form
    * @param $inventoryUsage
    */
-  public function updateInventory($form, $inventoryUsage)
+  public static function updateInventory($form, $inventoryUsage)
   {
     foreach ($inventoryUsage->items as $item) {
       if ($item->quantity > 0) {
@@ -95,7 +95,10 @@ class InventoryUsage extends TransactionModel
         $options['quantity_reference'] = $item->quantity;
         $options['unit_reference'] = $item->unit;
         $options['converter_reference'] = $item->converter;
-        InventoryHelper::decrease($form, $item->inventoryUsage->warehouse, $item->item, $item->quantity, $item->unit, $item->converter, $options);
+
+        if ($form->approval_status === 1) {
+          InventoryHelper::decrease($form, $item->inventoryUsage->warehouse, $item->item, $item->quantity, $item->unit, $item->converter, $options);
+        };
       }
     }
   }
