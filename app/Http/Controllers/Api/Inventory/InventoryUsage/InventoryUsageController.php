@@ -125,7 +125,17 @@ class InventoryUsageController extends Controller
    */
   public function update(UpdateRequest $request, $id)
   {
+
     $inventoryUsage = InventoryUsage::with('form')->findOrFail($id);
+    if ($request->get('date') < $inventoryUsage->form->date) {
+      return response()->json([
+        'code' => 422,
+        'message' => "The given data was invalid.",
+        'errors' => [
+          "warehouse_id" => ["Can't choose date less than the current inventory usage date"]
+        ],
+      ], 422);
+    };
 
     $inventoryUsage->isAllowedToUpdate();
 

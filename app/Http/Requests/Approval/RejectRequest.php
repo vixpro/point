@@ -24,7 +24,7 @@ class RejectRequest extends FormRequest
   public function rules()
   {
     return [
-      'notes' => 'required'
+      'notes' => 'required|max:255'
     ];
   }
 }
