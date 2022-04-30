@@ -137,6 +137,16 @@ class InventoryUsageController extends Controller
       ], 422);
     };
 
+    if ($inventoryUsage->form->approval_status == -1) {
+      return response()->json([
+        'code' => 422,
+        'message' => "The given data was invalid.",
+        'errors' => [
+          "approval_status" => ["Can't edit the rejected form!"]
+        ],
+      ], 422);
+    };
+
     $inventoryUsage->isAllowedToUpdate();
 
     $result = DB::connection('tenant')->transaction(function () use ($request, $inventoryUsage) {
