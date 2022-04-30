@@ -10,95 +10,98 @@ use Illuminate\Http\Request;
 
 class TransactionModel extends PointModel
 {
-    use FormScopes, DashboardChartPeriod;
+  use FormScopes, DashboardChartPeriod;
 
-    public function requestCancel(Request $request)
-    {
-        $canceled = false;
+  public function requestCancel(Request $request)
+  {
+    $canceled = false;
 
-        if (tenant(auth()->user()->id)->id === $this->form->created_by) {
-            // If auth user cancel his own form, then no need to approval
-            // Should do any action on form canceled
-            
-            // $canceled = true;
-        }
+    if (tenant(auth()->user()->id)->id === $this->form->created_by) {
+      // If auth user cancel his own form, then no need to approval
+      // Should do any action on form canceled
 
-        $this->form->request_cancellation_to = $this->form->request_approval_to;
-        $this->form->request_cancellation_by = tenant(auth()->user()->id)->id;
-        $this->form->request_cancellation_at = now();
-        $this->form->request_cancellation_reason = $request->get('reason');
-        $this->form->cancellation_status = $canceled;
-        $this->form->save();
+      // $canceled = true;
     }
 
-    /**
-     * Cannot update form that already archived.
-     *
-     * @throws FormArchivedException
-     */
-    public function updatedFormNotArchived()
-    {
-        if (is_null($this->form->number)) {
-            throw new FormArchivedException();
-        }
+    if ($this->form->formable_type === "InventoryUsage") {
+      $this->form->approval_status = 0;
     }
+    $this->form->request_cancellation_to = $this->form->request_approval_to;
+    $this->form->request_cancellation_by = tenant(auth()->user()->id)->id;
+    $this->form->request_cancellation_at = now();
+    $this->form->request_cancellation_reason = $request->get('reason');
+    $this->form->cancellation_status = $canceled;
+    $this->form->save();
+  }
 
-    /**
-     * Cannot delete form that already deleted.
-     *
-     * @throws FormArchivedException
-     */
-    public function isNotCanceled()
-    {
-        if ($this->form->cancellation_status == 1) {
-            throw new FormArchivedException();
-        }
+  /**
+   * Cannot update form that already archived.
+   *
+   * @throws FormArchivedException
+   */
+  public function updatedFormNotArchived()
+  {
+    if (is_null($this->form->number)) {
+      throw new FormArchivedException();
     }
+  }
 
-    public function isActive()
-    {
-        return $this->form->number != null && $this->form->cancelation_status != 1;
+  /**
+   * Cannot delete form that already deleted.
+   *
+   * @throws FormArchivedException
+   */
+  public function isNotCanceled()
+  {
+    if ($this->form->cancellation_status == 1) {
+      throw new FormArchivedException();
     }
+  }
 
-    public function isCancellationPending()
-    {
-        return $this->form->number != null && $this->cancelation_status == 0;
-    }
+  public function isActive()
+  {
+    return $this->form->number != null && $this->form->cancelation_status != 1;
+  }
 
-    /**
-     * Update form should be in same period.
-     *
-     * @param $date
-     * @throws UpdatePeriodNotAllowedException
-     */
-    public function updatedFormInSamePeriod($date)
-    {
-        if (date('Y-m', strtotime($date)) != date('Y-m', strtotime($this->form->date))) {
-            throw new UpdatePeriodNotAllowedException();
-        }
-    }
+  public function isCancellationPending()
+  {
+    return $this->form->number != null && $this->cancelation_status == 0;
+  }
 
-    public function archives()
-    {
-        return get_class($this)::join('forms', 'forms.formable_id', '=', $this::getTableName('id'))
-            ->whereNotNull('edited_number')
-            ->where('formable_type', $this->form->formable_type)
-            ->where('increment', $this->form->increment)
-            ->where('increment_group', $this->form->increment_group)
-            ->select($this::getTableName('*'))
-            ->with('form')
-            ->get();
+  /**
+   * Update form should be in same period.
+   *
+   * @param $date
+   * @throws UpdatePeriodNotAllowedException
+   */
+  public function updatedFormInSamePeriod($date)
+  {
+    if (date('Y-m', strtotime($date)) != date('Y-m', strtotime($this->form->date))) {
+      throw new UpdatePeriodNotAllowedException();
     }
+  }
 
-    public function origin()
-    {
-        return get_class($this)::join('forms', 'forms.formable_id', '=', $this::getTableName('id'))
-            ->whereNull('edited_number')
-            ->where('formable_type', $this->form->formable_type)
-            ->where('increment', $this->form->increment)
-            ->where('increment_group', $this->form->increment_group)
-            ->select($this::getTableName('*'))
-            ->with('form')
-            ->first();
-    }
+  public function archives()
+  {
+    return get_class($this)::join('forms', 'forms.formable_id', '=', $this::getTableName('id'))
+      ->whereNotNull('edited_number')
+      ->where('formable_type', $this->form->formable_type)
+      ->where('increment', $this->form->increment)
+      ->where('increment_group', $this->form->increment_group)
+      ->select($this::getTableName('*'))
+      ->with('form')
+      ->get();
+  }
+
+  public function origin()
+  {
+    return get_class($this)::join('forms', 'forms.formable_id', '=', $this::getTableName('id'))
+      ->whereNull('edited_number')
+      ->where('formable_type', $this->form->formable_type)
+      ->where('increment', $this->form->increment)
+      ->where('increment_group', $this->form->increment_group)
+      ->select($this::getTableName('*'))
+      ->with('form')
+      ->first();
+  }
 }

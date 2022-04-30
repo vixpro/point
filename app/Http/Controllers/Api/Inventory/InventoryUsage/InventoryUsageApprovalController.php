@@ -26,6 +26,9 @@ class InventoryUsageApprovalController extends Controller
     $inventoryUsage->form->approval_by = auth()->user()->id;
     $inventoryUsage->form->approval_at = now();
     $inventoryUsage->form->approval_status = 1;
+    if ($inventoryUsage->form->request_cancellation_by) {
+      $inventoryUsage->form->cancellation_status = true;
+    }
     $inventoryUsage->form->save();
 
     InventoryUsage::updateInventory($inventoryUsage->form, $inventoryUsage);
