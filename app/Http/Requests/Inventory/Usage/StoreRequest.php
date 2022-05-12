@@ -15,6 +15,9 @@ class StoreRequest extends FormRequest
    */
   public function authorize()
   {
+    if (!tenant(auth()->user()->id)->hasPermissionTo('create inventory usage')) {
+      return false;
+    }
     return true;
   }
 
